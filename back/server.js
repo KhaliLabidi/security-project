@@ -23,6 +23,25 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+const keyVaultSchema = new mongoose.Schema({
+  keyHash: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const KeyVault = mongoose.model('KeyVault', keyVaultSchema);
+
+const crypto = require('crypto');
+
+app.post('/api/store-key', async (req, res) => {
+  const { key } = req.body;
+  const keyHash = crypto.createHash('sha256').update(key).digest('hex');
+
+  const newKeyVault = new KeyVault({ keyHash });
+  await newKeyVault.save();
+
+  res.status(201).send('Key stored successfully');
+});
+
 app.post('/api/register', async (req, res) => {
   const { email, username, password, confirmPassword, captcha } = req.body;
 
@@ -66,7 +85,13 @@ app.post('/api/login', async (req, res) => {
     return res.status(400).send('Invalid email or password');
   }
 
-  const role = user._id.toString() === '674ccda89c364e97f5e965df' ? 'admin' : 'user';
+  let role = 'user';
+  if (user._id.toString() === '674ccda89c364e97f5e965df') {
+    role = 'admin';
+  } else if (['674e2489b7ca46dcfcb80acc', '674e4282b6cd89467793bff5'].includes(user._id.toString())) {
+    role = 'privileged';
+  }
+
   console.log(`Assigned role for ${email}: ${role}`); // Add this line
   res.status(200).json({ message: 'Login successful', role });
 });
