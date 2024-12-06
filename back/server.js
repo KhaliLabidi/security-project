@@ -61,7 +61,7 @@ app.post('/api/login', async (req, res) => {
   console.log('Login Request Data:', req.body); // Add this line
 
   // Verify reCAPTCHA
-  const secretKey = '6LdcjI8qAAAAAGdcaYRETPA0eESwI62kp9vCX6wn';
+  const secretKey = 'SECRET_KEY';
   const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
 
   try {
